@@ -1,15 +1,25 @@
 # import math
 import numpy as np
+
 # import time
 import math
+
 # import sys
 import os
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QGridLayout, QAction, QFileDialog
+from PyQt5.QtWidgets import (
+    QMainWindow,
+    QTableWidget,
+    QTableWidgetItem,
+    QGridLayout,
+    QAction,
+    QFileDialog,
+)
 from PyQt5.QtGui import QColor, QIcon, QBrush, QLinearGradient
 from PyQt5.QtCore import Qt, QThread
 from xml.etree import ElementTree
 from nest_calculation import CalculateThread
+
 # from fractions import Fraction
 
 
@@ -41,45 +51,49 @@ class Window(QMainWindow):
         # Create a grid layout object in the main widget
         self.grid_layout = QGridLayout(self.main_widget)
         self.setLayout(self.grid_layout)
-        self.grid_layout.setContentsMargins(30, 10, 30, 10)
+        self.grid_layout.setContentsMargins(10, 10, 10, 10)
         self.grid_layout.setHorizontalSpacing(20)
         self.grid_layout.setVerticalSpacing(20)
 
         # Set properties of the window
-        self.setGeometry(150, 35, 1000, 600)  # TODO make window and contents adjustable to any size, allow zooming
+        self.setGeometry(
+            150, 35, 1000, 600
+        )  # TODO make window and contents adjustable to any size, allow zooming
 
         self.setWindowTitle(f"LengthNestPro, The free 1D nesting optimizer")
-        self.setWindowIcon(QtGui.QIcon("C:/Program Files (x86)/LengthNestPro v1.3/icon.ico"))
-        self.statusBar().showMessage('Ready')
+        self.setWindowIcon(
+            QtGui.QIcon("C:/Program Files (x86)/LengthNestPro v1.3/icon.ico")
+        )
+        self.statusBar().showMessage("Ready")
 
         # Setup menu bar options
         # Create new action
-        new_action = QAction(QIcon('new.png'), '&New', self)
-        new_action.setShortcut('Ctrl+N')
-        new_action.setStatusTip('New document')
+        new_action = QAction(QIcon("new.png"), "&New", self)
+        new_action.setShortcut("Ctrl+N")
+        new_action.setStatusTip("New document")
         new_action.triggered.connect(self.new_call)
 
         # Create open action
-        open_action = QAction(QIcon('open.png'), '&Open', self)
-        open_action.setShortcut('Ctrl+O')
-        open_action.setStatusTip('Open document')
+        open_action = QAction(QIcon("open.png"), "&Open", self)
+        open_action.setShortcut("Ctrl+O")
+        open_action.setStatusTip("Open document")
         open_action.triggered.connect(self.open_call)
 
         # Create save action
-        save_action = QAction(QIcon('save.png'), '&Save', self)
-        save_action.setShortcut('Ctrl+S')
-        save_action.setStatusTip('Save document')
+        save_action = QAction(QIcon("save.png"), "&Save", self)
+        save_action.setShortcut("Ctrl+S")
+        save_action.setStatusTip("Save document")
         save_action.triggered.connect(self.save_call)
 
         # Create quit action
-        quit_action = QAction(QIcon('quit.png'), '&Quit', self)
-        quit_action.setShortcut('Ctrl+Q')
-        quit_action.setStatusTip('Quit application')
+        quit_action = QAction(QIcon("quit.png"), "&Quit", self)
+        quit_action.setShortcut("Ctrl+Q")
+        quit_action.setStatusTip("Quit application")
         quit_action.triggered.connect(self.quit_call)
 
         # Create menu bar and add actions
         menu_bar = self.menuBar()
-        file_menu = menu_bar.addMenu('&File')
+        file_menu = menu_bar.addMenu("&File")
         file_menu.addAction(new_action)
         file_menu.addAction(open_action)
         file_menu.addAction(save_action)
@@ -92,14 +106,14 @@ class Window(QMainWindow):
 
         # Create blank canvas by placing a label object in the window and setting its properties
         self.nest_image = QtWidgets.QLabel()
-        canvas = QtGui.QPixmap(1100, 360)
+        canvas = QtGui.QPixmap(1400, 422)
         canvas.fill(QColor(150, 150, 150))
         self.nest_image.setPixmap(canvas)
 
         # Place nest_image inside of a scroll area
         self.scroll_area = QtWidgets.QScrollArea()
-        self.scroll_area.setFixedWidth(1116)
-        self.scroll_area.setFixedHeight(362)
+        self.scroll_area.setFixedWidth(1440)
+        self.scroll_area.setFixedHeight(540)
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setWidget(self.nest_image)
         self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
@@ -125,7 +139,7 @@ class Window(QMainWindow):
         self.t1.setColumnCount(3)
         self.t1.setColumnWidth(0, 60)
         self.t1.setColumnWidth(1, 60)
-        self.t1.setColumnWidth(2, 120)
+        self.t1.setColumnWidth(2, 420)
         self.t1.setHorizontalHeaderLabels(["Qty", "Length", "Name / ID"])
 
         self.t1.update_table_width(self.t1)
@@ -230,9 +244,16 @@ class Window(QMainWindow):
         self.t2.setColumnCount(1)
         self.t2.setColumnWidth(0, 150)
         self.t2.setHorizontalHeaderLabels([""])
-        self.t2.setVerticalHeaderLabels(["Stock Length", "Left Waste", "Right Waste", "Spacing", "Max Parts Per Nest "
-                                                                                                 "(goal)",
-                                         "Max # of Containers (goal)"])
+        self.t2.setVerticalHeaderLabels(
+            [
+                "Stock Length",
+                "Left Waste",
+                "Right Waste",
+                "Spacing",
+                "Max Parts Per Nest " "(goal)",
+                "Max # of Containers (goal)",
+            ]
+        )
 
         self.stock_length = QTableWidgetItem("240")
         self.left_waste = QTableWidgetItem("4.72")
@@ -264,82 +285,100 @@ class Window(QMainWindow):
         # Create status messages
         self.error_message = QtWidgets.QLabel(self)
         self.error_message.setHidden(True)
-        self.error_message.setFont(QtGui.QFont('Arial', 12))
+        self.error_message.setFont(QtGui.QFont("Arial", 12))
         self.error_message.setAlignment(Qt.AlignCenter)
-        self.error_message.setText("One or more of the parts is too long for the available nesting length.")
+        self.error_message.setText(
+            "One or more of the parts is too long for the available nesting length."
+        )
         self.error_message.setWordWrap(True)
         self.error_message.setFixedWidth(200)
         self.error_message.setFixedHeight(100)
-        self.error_message.setStyleSheet("margin:0px 20px 0px 0px; padding:0px 10px 0px 10px; background-color: red")
+        self.error_message.setStyleSheet(
+            "margin:0px 20px 0px 0px; padding:0px 10px 0px 10px; background-color: red"
+        )
         self.grid_layout.addWidget(self.error_message, 1, 2, Qt.AlignCenter)
 
         self.error_message2 = QtWidgets.QLabel(self)
         self.error_message2.setHidden(True)
-        self.error_message2.setFont(QtGui.QFont('Arial', 12))
+        self.error_message2.setFont(QtGui.QFont("Arial", 12))
         self.error_message2.setAlignment(Qt.AlignCenter)
         self.error_message2.setText("Some values still need to be entered.")
         self.error_message2.setWordWrap(True)
         self.error_message2.setFixedWidth(200)
         self.error_message2.setFixedHeight(100)
-        self.error_message2.setStyleSheet("margin:0px 20px 0px 0px; padding:0px 10px 0px 10px; background-color: red")
+        self.error_message2.setStyleSheet(
+            "margin:0px 20px 0px 0px; padding:0px 10px 0px 10px; background-color: red"
+        )
         self.grid_layout.addWidget(self.error_message2, 1, 2, Qt.AlignCenter)
 
         self.error_message3 = QtWidgets.QLabel(self)
         self.error_message3.setHidden(True)
-        self.error_message3.setFont(QtGui.QFont('Arial', 12))
+        self.error_message3.setFont(QtGui.QFont("Arial", 12))
         self.error_message3.setAlignment(Qt.AlignCenter)
-        self.error_message3.setText("Nested quantities do not match required quantities.")
+        self.error_message3.setText(
+            "Nested quantities do not match required quantities."
+        )
         self.error_message3.setWordWrap(True)
         self.error_message3.setFixedWidth(200)
         self.error_message3.setFixedHeight(100)
-        self.error_message3.setStyleSheet("margin:0px 20px 0px 0px; padding:0px 10px 0px 10px; background-color: red")
+        self.error_message3.setStyleSheet(
+            "margin:0px 20px 0px 0px; padding:0px 10px 0px 10px; background-color: red"
+        )
         self.grid_layout.addWidget(self.error_message3, 1, 2, Qt.AlignCenter)
 
         self.error_message4 = QtWidgets.QLabel(self)
         self.error_message4.setHidden(True)
-        self.error_message4.setFont(QtGui.QFont('Arial', 12))
+        self.error_message4.setFont(QtGui.QFont("Arial", 12))
         self.error_message4.setAlignment(Qt.AlignCenter)
         self.error_message4.setText("Calculation was canceled.")
         self.error_message4.setWordWrap(True)
         self.error_message4.setFixedWidth(200)
         self.error_message4.setFixedHeight(100)
-        self.error_message4.setStyleSheet("margin:0px 20px 0px 0px; padding:0px 10px 0px 10px; background-color: rgb("
-                                          "100, 100, 0)")
+        self.error_message4.setStyleSheet(
+            "margin:0px 20px 0px 0px; padding:0px 10px 0px 10px; background-color: rgb("
+            "100, 100, 0)"
+        )
         self.grid_layout.addWidget(self.error_message4, 1, 2, Qt.AlignCenter)
 
         self.success_message = QtWidgets.QLabel(self)
         self.success_message.setHidden(True)
-        self.success_message.setFont(QtGui.QFont('Arial', 12))
+        self.success_message.setFont(QtGui.QFont("Arial", 12))
         self.success_message.setAlignment(Qt.AlignCenter)
         self.success_message.setText("Parts were nested successfully.")
         self.success_message.setWordWrap(True)
         self.success_message.setFixedWidth(200)
         self.success_message.setFixedHeight(100)
-        self.success_message.setStyleSheet("margin:0px 20px 0px 0px; padding:0px 10px 0px 10px; background-color: "
-                                           "green")
+        self.success_message.setStyleSheet(
+            "margin:0px 20px 0px 0px; padding:0px 10px 0px 10px; background-color: "
+            "green"
+        )
         self.grid_layout.addWidget(self.success_message, 1, 2, Qt.AlignCenter)
 
         self.status_message = QtWidgets.QLabel(self)
         self.status_message.setHidden(True)
-        self.status_message.setFont(QtGui.QFont('Arial', 12))
+        self.status_message.setFont(QtGui.QFont("Arial", 12))
         self.status_message.setAlignment(Qt.AlignCenter)
         self.status_message.setText("Calculating new nest...")
         self.status_message.setWordWrap(True)
         self.status_message.setFixedWidth(200)
         self.status_message.setFixedHeight(100)
-        self.status_message.setStyleSheet("margin:0px 20px 0px 0px; padding:0px 10px 0px 10px; background-color: blue")
+        self.status_message.setStyleSheet(
+            "margin:0px 20px 0px 0px; padding:0px 10px 0px 10px; background-color: blue"
+        )
         self.grid_layout.addWidget(self.status_message, 1, 2, Qt.AlignCenter)
 
         self.status_message2 = QtWidgets.QLabel(self)
         self.status_message2.setHidden(True)
-        self.status_message2.setFont(QtGui.QFont('Arial', 12))
+        self.status_message2.setFont(QtGui.QFont("Arial", 12))
         self.status_message2.setAlignment(Qt.AlignCenter)
         self.status_message2.setText("Click 'Calculate' to begin nesting.")
         self.status_message2.setWordWrap(True)
         self.status_message2.setFixedWidth(200)
         self.status_message2.setFixedHeight(100)
-        self.status_message2.setStyleSheet("margin:0px 20px 0px 0px; padding:0px 10px 0px 10px; background-color: "
-                                           "rgb(100, 100, 100); color: rgb(255, 255, 255)")
+        self.status_message2.setStyleSheet(
+            "margin:0px 20px 0px 0px; padding:0px 10px 0px 10px; background-color: "
+            "rgb(100, 100, 100); color: rgb(255, 255, 255)"
+        )
         self.grid_layout.addWidget(self.status_message2, 1, 2, Qt.AlignCenter)
 
         self.status_message2.setVisible(True)
@@ -399,13 +438,15 @@ class Window(QMainWindow):
             super().__init__()
             # Adjust style of grid lines
             self.setShowGrid(False)
-            self.setStyleSheet('QTableView::item {border-right: 1px solid #909090; border-bottom: 1px solid #909090;}')
+            self.setStyleSheet(
+                "QTableView::item {border-right: 1px solid #909090; border-bottom: 1px solid #909090;}"
+            )
 
         def check_row_for_contents(self, row_number):
             num_columns = self.columnCount()
             for i in range(num_columns):
-                if hasattr(self.item(row_number, i), 'text'):
-                    if self.item(row_number, i).text() != '':
+                if hasattr(self.item(row_number, i), "text"):
+                    if self.item(row_number, i).text() != "":
                         return True
             # If this code is reached, then there were no contents in any cells in the specified row
             return False
@@ -430,7 +471,10 @@ class Window(QMainWindow):
             # Check if more empty rows need to be deleted from the end of the table
             rows_need_deleted = 1
             while rows_need_deleted == 1:
-                if not self.check_row_for_contents(last_row_index - 1) and num_rows > self.starting_num_rows:
+                if (
+                    not self.check_row_for_contents(last_row_index - 1)
+                    and num_rows > self.starting_num_rows
+                ):
                     self.removeRow(last_row_index)
                     num_rows -= 1
                     last_row_index -= 1
@@ -453,7 +497,10 @@ class Window(QMainWindow):
 
             # Remove a row from the table if the second to last row has no contents (assumes there will always be an
             #   empty row after any contents)
-            if not self.check_row_for_contents(last_row_index - 1) and num_rows > self.starting_num_rows:
+            if (
+                not self.check_row_for_contents(last_row_index - 1)
+                and num_rows > self.starting_num_rows
+            ):
                 self.remove_row()
 
         def update_table_width(self, table):
@@ -497,7 +544,9 @@ class Window(QMainWindow):
 
             # Highlight the correct cell based on the status of the table
             # TODO remove last condition after adding max_containers functionality since no rows will be hidden
-            if self.rowCount() != current_row + 1 or (cell_value != "" and self.expandable):
+            if self.rowCount() != current_row + 1 or (
+                cell_value != "" and self.expandable
+            ):
                 self.setCurrentCell(current_row + 1, current_column)
             else:
                 self.setCurrentCell(current_row, current_column)
@@ -511,11 +560,14 @@ class Window(QMainWindow):
         self.t1.clearContents()
 
     def open_call(self):
-
         # Allow user to select xml file to open, or use file path from drag and drop
         if self.file_path == 0:
-            file_path = QFileDialog.getOpenFileName(QFileDialog(), "", self.default_path_string,
-                                                    "LengthNestPro xml (*.LNP.xml)")[0]
+            file_path = QFileDialog.getOpenFileName(
+                QFileDialog(),
+                "",
+                self.default_path_string,
+                "LengthNestPro xml (*.LNP.xml)",
+            )[0]
         else:
             file_path = self.file_path
 
@@ -525,7 +577,7 @@ class Window(QMainWindow):
 
             # Create blank list with length equal to the number of parts in the nesting job
             blank_list = []
-            required_parts = nesting_job.find('requiredParts')
+            required_parts = nesting_job.find("requiredParts")
             for i in range(len(required_parts)):
                 blank_list.append(QTableWidgetItem(""))
 
@@ -539,9 +591,9 @@ class Window(QMainWindow):
 
             # Extract info for each part and add it to "required parts" table
             for i, part in enumerate(required_parts):
-                name[i] = QTableWidgetItem(part.find('name').text)
-                qty[i] = QTableWidgetItem(part.find('qty').text)
-                length[i] = QTableWidgetItem(part.find('length').text)
+                name[i] = QTableWidgetItem(part.find("name").text)
+                qty[i] = QTableWidgetItem(part.find("qty").text)
+                length[i] = QTableWidgetItem(part.find("length").text)
                 name[i].setTextAlignment(Qt.AlignCenter)
                 qty[i].setTextAlignment(Qt.AlignCenter)
                 length[i].setTextAlignment(Qt.AlignCenter)
@@ -550,59 +602,77 @@ class Window(QMainWindow):
                 self.t1.setItem(i, 2, name[i])
 
             # Extract nesting settings and add them to "nesting settings" table
-            nesting_settings = nesting_job.find('nestingSettings')
+            nesting_settings = nesting_job.find("nestingSettings")
 
-            if hasattr(nesting_settings.find('stockLength'), 'text'):
-                stock_length = QTableWidgetItem(nesting_settings.find('stockLength').text)
+            if hasattr(nesting_settings.find("stockLength"), "text"):
+                stock_length = QTableWidgetItem(
+                    nesting_settings.find("stockLength").text
+                )
                 stock_length.setTextAlignment(Qt.AlignCenter)
                 self.t2.setItem(0, 0, stock_length)
 
-            if hasattr(nesting_settings.find('leftWaste'), 'text'):
-                left_waste = QTableWidgetItem(nesting_settings.find('leftWaste').text)
+            if hasattr(nesting_settings.find("leftWaste"), "text"):
+                left_waste = QTableWidgetItem(nesting_settings.find("leftWaste").text)
                 left_waste.setTextAlignment(Qt.AlignCenter)
                 self.t2.setItem(1, 0, left_waste)
 
-            if hasattr(nesting_settings.find('rightWaste'), 'text'):
-                right_waste = QTableWidgetItem(nesting_settings.find('rightWaste').text)
+            if hasattr(nesting_settings.find("rightWaste"), "text"):
+                right_waste = QTableWidgetItem(nesting_settings.find("rightWaste").text)
                 right_waste.setTextAlignment(Qt.AlignCenter)
                 self.t2.setItem(2, 0, right_waste)
 
-            if hasattr(nesting_settings.find('spacing'), 'text'):
-                spacing = QTableWidgetItem(nesting_settings.find('spacing').text)
+            if hasattr(nesting_settings.find("spacing"), "text"):
+                spacing = QTableWidgetItem(nesting_settings.find("spacing").text)
                 spacing.setTextAlignment(Qt.AlignCenter)
                 self.t2.setItem(3, 0, spacing)
 
-            if hasattr(nesting_settings.find('maxPartsPerNest'), 'text'):
-                max_parts_per_nest = QTableWidgetItem(nesting_settings.find('maxPartsPerNest').text)
+            if hasattr(nesting_settings.find("maxPartsPerNest"), "text"):
+                max_parts_per_nest = QTableWidgetItem(
+                    nesting_settings.find("maxPartsPerNest").text
+                )
                 max_parts_per_nest.setTextAlignment(Qt.AlignCenter)
                 self.t2.setItem(4, 0, max_parts_per_nest)
 
-            if hasattr(nesting_settings.find('maxContainers'), 'text'):
-                max_containers = QTableWidgetItem(nesting_settings.find('maxContainers').text)
+            if hasattr(nesting_settings.find("maxContainers"), "text"):
+                max_containers = QTableWidgetItem(
+                    nesting_settings.find("maxContainers").text
+                )
                 max_containers.setTextAlignment(Qt.AlignCenter)
                 self.t2.setItem(5, 0, max_containers)
 
             self.name_of_open_file = file_path
-            self.setWindowTitle(f"LengthNestPro, The free 1D nesting optimizer - {self.name_of_open_file}")
-            self.statusBar().showMessage('Ready')
+            self.setWindowTitle(
+                f"LengthNestPro, The free 1D nesting optimizer - {self.name_of_open_file}"
+            )
+            self.statusBar().showMessage("Ready")
 
     def save_call(self):
         # Allow user to select where to save xml file
         file_path = 0
         if file_path == 0:
-            file_path = QFileDialog.getSaveFileName(QFileDialog(), "", self.default_path_string,
-                                                    "LengthNestPro xml (*.LNP.xml)")[0]
+            file_path = QFileDialog.getSaveFileName(
+                QFileDialog(),
+                "",
+                self.default_path_string,
+                "LengthNestPro xml (*.LNP.xml)",
+            )[0]
             if file_path:
                 # Construct xml file structure
-                nesting_job = ElementTree.Element('nestingJob')
-                required_parts = ElementTree.SubElement(nesting_job, 'requiredParts')
-                nesting_settings = ElementTree.SubElement(nesting_job, 'nestingSettings')
-                stock_length = ElementTree.SubElement(nesting_settings, 'stockLength')
-                left_waste = ElementTree.SubElement(nesting_settings, 'leftWaste')
-                right_waste = ElementTree.SubElement(nesting_settings, 'rightWaste')
-                spacing = ElementTree.SubElement(nesting_settings, 'spacing')
-                max_parts_per_nest = ElementTree.SubElement(nesting_settings, 'maxPartsPerNest')
-                max_containers = ElementTree.SubElement(nesting_settings, 'maxContainers')
+                nesting_job = ElementTree.Element("nestingJob")
+                required_parts = ElementTree.SubElement(nesting_job, "requiredParts")
+                nesting_settings = ElementTree.SubElement(
+                    nesting_job, "nestingSettings"
+                )
+                stock_length = ElementTree.SubElement(nesting_settings, "stockLength")
+                left_waste = ElementTree.SubElement(nesting_settings, "leftWaste")
+                right_waste = ElementTree.SubElement(nesting_settings, "rightWaste")
+                spacing = ElementTree.SubElement(nesting_settings, "spacing")
+                max_parts_per_nest = ElementTree.SubElement(
+                    nesting_settings, "maxPartsPerNest"
+                )
+                max_containers = ElementTree.SubElement(
+                    nesting_settings, "maxContainers"
+                )
 
                 # Add current data for nesting settings
                 try:
@@ -665,10 +735,10 @@ class Window(QMainWindow):
                 # Add current data for required parts
                 # for i in range(len(self.t1))
                 for i in range(num_parts):
-                    part[i] = ElementTree.SubElement(required_parts, 'part')
-                    qty[i] = ElementTree.SubElement(part[i], 'qty')
-                    length[i] = ElementTree.SubElement(part[i], 'length')
-                    name[i] = ElementTree.SubElement(part[i], 'name')
+                    part[i] = ElementTree.SubElement(required_parts, "part")
+                    qty[i] = ElementTree.SubElement(part[i], "qty")
+                    length[i] = ElementTree.SubElement(part[i], "length")
+                    name[i] = ElementTree.SubElement(part[i], "name")
                     qty[i].text = self.t1.item(i, 0).text()
                     length[i].text = self.t1.item(i, 1).text()
                     name[i].text = self.t1.item(i, 2).text()
@@ -678,8 +748,10 @@ class Window(QMainWindow):
                 save_data_file = open(file_path, "wb")
                 save_data_file.write(save_data_string)
                 self.name_of_open_file = file_path
-                self.setWindowTitle(f"LengthNestPro, The free 1D nesting optimizer - {self.name_of_open_file}")
-                self.statusBar().showMessage('Ready')
+                self.setWindowTitle(
+                    f"LengthNestPro, The free 1D nesting optimizer - {self.name_of_open_file}"
+                )
+                self.statusBar().showMessage("Ready")
 
     def save_results_call(self):
         # Make sure a file is open, and exit function if it is not
@@ -694,22 +766,36 @@ class Window(QMainWindow):
             file_path = f"{self.name_of_open_file[:-4]}.results.xml"
             if file_path:
                 # Construct xml file structure
-                nesting_job = ElementTree.Element('nestingJob')
-                required_parts = ElementTree.SubElement(nesting_job, 'requiredParts')
-                nesting_settings = ElementTree.SubElement(nesting_job, 'nestingSettings')
-                result = ElementTree.SubElement(nesting_job, 'result')
-                stock_length = ElementTree.SubElement(nesting_settings, 'stockLength')
-                left_waste = ElementTree.SubElement(nesting_settings, 'leftWaste')
-                right_waste = ElementTree.SubElement(nesting_settings, 'rightWaste')
-                spacing = ElementTree.SubElement(nesting_settings, 'spacing')
-                max_parts_per_nest = ElementTree.SubElement(nesting_settings, 'maxPartsPerNest')
-                max_containers = ElementTree.SubElement(nesting_settings, 'maxContainers')
-                num_lengths_required = ElementTree.SubElement(result, 'numLengthsRequired')
-                num_lengths_required.text = f"{self.calculator.final_required_lengths_minus_drop}"
-                scrap_rate = ElementTree.SubElement(result, 'scrapRate')
+                nesting_job = ElementTree.Element("nestingJob")
+                required_parts = ElementTree.SubElement(nesting_job, "requiredParts")
+                nesting_settings = ElementTree.SubElement(
+                    nesting_job, "nestingSettings"
+                )
+                result = ElementTree.SubElement(nesting_job, "result")
+                stock_length = ElementTree.SubElement(nesting_settings, "stockLength")
+                left_waste = ElementTree.SubElement(nesting_settings, "leftWaste")
+                right_waste = ElementTree.SubElement(nesting_settings, "rightWaste")
+                spacing = ElementTree.SubElement(nesting_settings, "spacing")
+                max_parts_per_nest = ElementTree.SubElement(
+                    nesting_settings, "maxPartsPerNest"
+                )
+                max_containers = ElementTree.SubElement(
+                    nesting_settings, "maxContainers"
+                )
+                num_lengths_required = ElementTree.SubElement(
+                    result, "numLengthsRequired"
+                )
+                num_lengths_required.text = (
+                    f"{self.calculator.final_required_lengths_minus_drop}"
+                )
+                scrap_rate = ElementTree.SubElement(result, "scrapRate")
                 scrap_rate.text = f"{self.calculator.scrap_without_drop}"
-                num_containers_required = ElementTree.SubElement(result, 'numContainersRequired')
-                num_containers_required.text = f"{self.calculator.actual_max_containers}"
+                num_containers_required = ElementTree.SubElement(
+                    result, "numContainersRequired"
+                )
+                num_containers_required.text = (
+                    f"{self.calculator.actual_max_containers}"
+                )
 
                 # Add current data for nesting settings
                 try:
@@ -771,10 +857,10 @@ class Window(QMainWindow):
 
                 # Add current data for required parts
                 for i in range(num_parts):
-                    part[i] = ElementTree.SubElement(required_parts, 'part')
-                    qty[i] = ElementTree.SubElement(part[i], 'qty')
-                    length[i] = ElementTree.SubElement(part[i], 'length')
-                    name[i] = ElementTree.SubElement(part[i], 'name')
+                    part[i] = ElementTree.SubElement(required_parts, "part")
+                    qty[i] = ElementTree.SubElement(part[i], "qty")
+                    length[i] = ElementTree.SubElement(part[i], "length")
+                    name[i] = ElementTree.SubElement(part[i], "name")
                     qty[i].text = self.t1.item(i, 0).text()
                     length[i].text = self.t1.item(i, 1).text()
                     name[i].text = self.t1.item(i, 2).text()
@@ -793,7 +879,9 @@ class Window(QMainWindow):
                 # Create blank list of lists with length equal to the number of patterns in the result
                 blank_list = []
                 for i in range(num_patterns):
-                    num_unique_parts = np.count_nonzero(self.calculator.final_patterns.T[i])
+                    num_unique_parts = np.count_nonzero(
+                        self.calculator.final_patterns.T[i]
+                    )
                     blank_list.append([])
                     for j in range(num_unique_parts):
                         blank_list[i].append(ElementTree.Element)
@@ -803,7 +891,9 @@ class Window(QMainWindow):
                 # Create blank list of lists with length equal to the number of patterns in the result
                 blank_list = []
                 for i in range(num_patterns):
-                    num_unique_parts = np.count_nonzero(self.calculator.final_patterns.T[i])
+                    num_unique_parts = np.count_nonzero(
+                        self.calculator.final_patterns.T[i]
+                    )
                     blank_list.append([])
                     for j in range(num_unique_parts):
                         blank_list[i].append(ElementTree.Element)
@@ -813,7 +903,9 @@ class Window(QMainWindow):
                 # Create blank list of lists with length equal to the number of patterns in the result
                 blank_list = []
                 for i in range(num_patterns):
-                    num_unique_parts = np.count_nonzero(self.calculator.final_patterns.T[i])
+                    num_unique_parts = np.count_nonzero(
+                        self.calculator.final_patterns.T[i]
+                    )
                     blank_list.append([])
                     for j in range(num_unique_parts):
                         blank_list[i].append(ElementTree.Element)
@@ -822,9 +914,11 @@ class Window(QMainWindow):
 
                 # Add current data for required parts
                 for i in range(num_patterns):
-                    pattern[i] = ElementTree.SubElement(result, 'pattern')
-                    pattern_label[i] = ElementTree.SubElement(pattern[i], 'patternLabel')
-                    pattern_qty[i] = ElementTree.SubElement(pattern[i], 'patternQty')
+                    pattern[i] = ElementTree.SubElement(result, "pattern")
+                    pattern_label[i] = ElementTree.SubElement(
+                        pattern[i], "patternLabel"
+                    )
+                    pattern_qty[i] = ElementTree.SubElement(pattern[i], "patternQty")
                     pattern_label[i].text = f"{i}"
                     pattern_qty[i].text = f"{int(self.calculator.final_allocations[i])}"
 
@@ -832,11 +926,19 @@ class Window(QMainWindow):
                     for j in range(len(self.calculator.final_patterns)):
                         ii = 0
                         if self.calculator.final_patterns[j, i]:
-                            nested_part[i][ii] = ElementTree.SubElement(pattern[i], 'nestedPart')
-                            nested_part_name[i][ii] = ElementTree.SubElement(nested_part[i][ii], 'nestedPartName')
-                            nested_part_qty[i][ii] = ElementTree.SubElement(nested_part[i][ii], 'nestedPartQty')
+                            nested_part[i][ii] = ElementTree.SubElement(
+                                pattern[i], "nestedPart"
+                            )
+                            nested_part_name[i][ii] = ElementTree.SubElement(
+                                nested_part[i][ii], "nestedPartName"
+                            )
+                            nested_part_qty[i][ii] = ElementTree.SubElement(
+                                nested_part[i][ii], "nestedPartQty"
+                            )
                             nested_part_name[i][ii].text = f"{self.part_names[j]}"
-                            nested_part_qty[i][ii].text = f"{int(self.calculator.final_patterns[j, i])}"
+                            nested_part_qty[i][
+                                ii
+                            ].text = f"{int(self.calculator.final_patterns[j, i])}"
                             ii += 1
 
                 # create a new XML file with the results
@@ -851,7 +953,7 @@ class Window(QMainWindow):
     def header1(self):
         # Create a label object in the window and set its properties
         self.h1 = QtWidgets.QLabel(self)
-        self.h1.setFont(QtGui.QFont('Arial', 16))
+        self.h1.setFont(QtGui.QFont("Arial", 16))
         self.h1.setText("Required Parts")
         self.h1.adjustSize()
         self.h1.setFixedWidth(280)
@@ -861,22 +963,22 @@ class Window(QMainWindow):
     def header3(self):
         # Create a label object in the window and set its properties
         self.h3 = QtWidgets.QLabel(self)
-        self.h3.setFont(QtGui.QFont('Arial', 16))
-        self.h3.setText("Nesting Settings")
+        self.h3.setFont(QtGui.QFont("Arial", 16))
+        self.h3.setText("Ustawienia nestingu")
         self.h3.adjustSize()
         self.h3.setStyleSheet("padding:0px 0px")
         self.h3.setAlignment(Qt.AlignHCenter)
 
     def calculate(self):
         self.calc_btn = QtWidgets.QPushButton(self)
-        self.calc_btn.setText("Calculate")
-        self.calc_btn.setFont(QtGui.QFont('Arial', 12))
+        self.calc_btn.setText("Oblicz")
+        self.calc_btn.setFont(QtGui.QFont("Arial", 12))
         self.calc_btn.clicked.connect(self.gather_inputs)
 
     def cancel(self):
         self.cancel_btn = QtWidgets.QPushButton(self)
         self.cancel_btn.setText("Cancel")
-        self.cancel_btn.setFont(QtGui.QFont('Arial', 12))
+        self.cancel_btn.setFont(QtGui.QFont("Arial", 12))
         self.cancel_btn.clicked.connect(self.cancel_calculate)
         self.cancel_btn.setVisible(False)
 
@@ -892,7 +994,6 @@ class Window(QMainWindow):
         self.new_thread.exit()
 
     def gather_inputs(self):
-
         # Reinitialize error code
         self.error = 0
 
@@ -929,9 +1030,15 @@ class Window(QMainWindow):
                 try:
                     float(length_text)
                     float(qty_text)
-                    self.part_lengths = np.append(self.part_lengths, [float(length_text)], 0)
-                    self.part_quantities = np.append(self.part_quantities, [float(qty_text)], 0)
-                    self.part_names = np.append(self.part_names, [name_text], 0)
+                    self.part_lengths = np.append(
+                        self.part_lengths, [float(length_text)], 0
+                    )
+                    self.part_quantities = np.append(
+                        self.part_quantities, [float(qty_text)], 0
+                    )
+                    self.part_names = np.append(
+                        self.part_names, [name_text + "-" + length_text], 0
+                    )
                 except ValueError:
                     print("part length and/or part qty and/or part name is invalid")
 
@@ -942,7 +1049,7 @@ class Window(QMainWindow):
         # Delete and recreate blank canvas
         self.nest_image.clear()
         self.nest_image = QtWidgets.QLabel()
-        canvas = QtGui.QPixmap(1100, 400)
+        canvas = QtGui.QPixmap(1400, 422)
         canvas.fill(QColor(150, 150, 150))
         self.nest_image.setPixmap(canvas)
         self.scroll_area.setWidget(self.nest_image)
@@ -984,7 +1091,9 @@ class Window(QMainWindow):
             else:
                 try:
                     # Try changing it to a float since a decimal would make it non-numeric
-                    self.max_parts_per_nest = math.floor(float(self.t2.item(4, 0).text()))
+                    self.max_parts_per_nest = math.floor(
+                        float(self.t2.item(4, 0).text())
+                    )
                 except ValueError:
                     # Must be a string, don't restrain the solution
                     self.max_parts_per_nest = -2
@@ -1012,10 +1121,15 @@ class Window(QMainWindow):
         self.status_message.setVisible(True)
 
         # Run nesting code if the user has given enough values
-        if len(self.part_lengths) != 0 and self.stock_length != -1 and self.left_waste != -1 \
-                and self.right_waste != -1 and self.spacing != -1 and self.max_parts_per_nest != -1 \
-                and self.max_containers != -1:
-
+        if (
+            len(self.part_lengths) != 0
+            and self.stock_length != -1
+            and self.left_waste != -1
+            and self.right_waste != -1
+            and self.spacing != -1
+            and self.max_parts_per_nest != -1
+            and self.max_containers != -1
+        ):
             # Run the nesting calculation thread.
             self.new_thread = QThread()
 
@@ -1065,8 +1179,13 @@ class Window(QMainWindow):
                     self.status_message.setVisible(False)
                     self.error_message.setVisible(True)
                 # Check if the nested quantities match required quantities
-                elif (np.dot(self.calculator.final_patterns,
-                             self.calculator.final_allocations) != self.part_quantities).all():
+                elif (
+                    np.dot(
+                        self.calculator.final_patterns,
+                        self.calculator.final_allocations,
+                    )
+                    != self.part_quantities
+                ).all():
                     self.status_message.setVisible(False)
                     self.error_message3.setVisible(True)
                 # Show success message if there are no issues
@@ -1082,17 +1201,16 @@ class Window(QMainWindow):
             self.error_message2.setVisible(True)
 
     def draw_nests(self):
-
         # Find number of patterns
         (num_rows, num_columns) = np.shape(self.calculator.final_patterns)
 
         if num_columns > 15:
-            canvas = QtGui.QPixmap(1100, 422 + (num_columns - 15) * 20)
+            canvas = QtGui.QPixmap(1400, 422 + (num_columns - 15) * 20)
             canvas.fill(QColor(150, 150, 150))
             self.nest_image.setPixmap(canvas)
             self.nest_image.setAlignment(Qt.AlignCenter)
-
-        pixel_scale_factor = 1000 / self.stock_length
+        scale = 1300
+        pixel_scale_factor = scale / self.stock_length
         self.part_lengths = self.part_lengths * pixel_scale_factor
         self.spacing = self.spacing * pixel_scale_factor
         self.left_waste = self.left_waste * pixel_scale_factor
@@ -1112,17 +1230,32 @@ class Window(QMainWindow):
         # brush.setColor(QtGui.QColor(200, 200, 200))
         brush.setStyle(Qt.SolidPattern)
         painter.setBrush(brush)
-
+        hight_bar = 20
         # Draw stock lengths
         for i in range(num_columns):
             brush.setColor(QtGui.QColor(200, 200, 200))
             painter.setBrush(brush)
-            painter.drawRects(QtCore.QRect(70, 75 + 20 * i, 1000, 16))
+            painter.drawRects(
+                QtCore.QRect(70, 75 + (hight_bar + 4) * i, scale, hight_bar)
+            )
             brush.setColor(QtGui.QColor(100, 100, 100))
             painter.setBrush(brush)
-            painter.drawRects(QtCore.QRect(70, 78 + 20 * i, int(round(self.left_waste)), 10))
             painter.drawRects(
-                QtCore.QRect(int(round(70 + 1000 - self.right_waste)), 78 + 20 * i, int(round(self.right_waste)), 10))
+                QtCore.QRect(
+                    70,
+                    78 + (hight_bar + 4) * i,
+                    int(round(self.left_waste)),
+                    hight_bar - 6,
+                )
+            )
+            painter.drawRects(
+                QtCore.QRect(
+                    int(round(70 + scale - self.right_waste)),
+                    78 + (hight_bar + 4) * i,
+                    int(round(self.right_waste)),
+                    hight_bar - 6,
+                )
+            )
         painter.end()
 
         red_list = np.array([255, 160, 160])
@@ -1150,13 +1283,27 @@ class Window(QMainWindow):
         darker_purple_list = purple_list + color_adjustment_value
         darker_white_list = white_list + color_adjustment_value
 
-        darker_red = QtGui.QColor(darker_red_list[0], darker_red_list[1], darker_red_list[2])
-        darker_orange = QtGui.QColor(darker_orange_list[0], darker_orange_list[1], darker_orange_list[2])
-        darker_yellow = QtGui.QColor(darker_yellow_list[0], darker_yellow_list[1], darker_yellow_list[2])
-        darker_green = QtGui.QColor(darker_green_list[0], darker_green_list[1], darker_green_list[2])
-        darker_blue = QtGui.QColor(darker_blue_list[0], darker_blue_list[1], darker_blue_list[2])
-        darker_purple = QtGui.QColor(darker_purple_list[0], darker_purple_list[1], darker_purple_list[2])
-        darker_white = QtGui.QColor(darker_white_list[0], darker_white_list[1], darker_white_list[2])
+        darker_red = QtGui.QColor(
+            darker_red_list[0], darker_red_list[1], darker_red_list[2]
+        )
+        darker_orange = QtGui.QColor(
+            darker_orange_list[0], darker_orange_list[1], darker_orange_list[2]
+        )
+        darker_yellow = QtGui.QColor(
+            darker_yellow_list[0], darker_yellow_list[1], darker_yellow_list[2]
+        )
+        darker_green = QtGui.QColor(
+            darker_green_list[0], darker_green_list[1], darker_green_list[2]
+        )
+        darker_blue = QtGui.QColor(
+            darker_blue_list[0], darker_blue_list[1], darker_blue_list[2]
+        )
+        darker_purple = QtGui.QColor(
+            darker_purple_list[0], darker_purple_list[1], darker_purple_list[2]
+        )
+        darker_white = QtGui.QColor(
+            darker_white_list[0], darker_white_list[1], darker_white_list[2]
+        )
 
         color_set = []
         for i in range(num_rows):
@@ -1210,7 +1357,6 @@ class Window(QMainWindow):
             nested_length = self.left_waste
             for j in range(num_rows):
                 for k in range(int(self.calculator.final_patterns[j, i])):
-
                     # Solid style
                     if 0 <= color_sequence[j] % 28 < 7:
                         pen2.setWidth(1)
@@ -1219,10 +1365,14 @@ class Window(QMainWindow):
                         brush2.setColor(color_set[color_sequence[j]])
                         brush2.setStyle(Qt.SolidPattern)
                         painter2.setBrush(brush2)
-                        painter2.drawRects(QtCore.QRect(int(round(70 + nested_length)), 
-                                                        75 + 20 * i, 
-                                                        int(round(self.part_lengths[j].item())), 
-                                                        16))
+                        painter2.drawRects(
+                            QtCore.QRect(
+                                int(round(70 + nested_length)),
+                                75 + (hight_bar + 4) * i,
+                                int(round(self.part_lengths[j].item())),
+                                hight_bar,
+                            )
+                        )
 
                     # Diagonal style
                     if 7 <= color_sequence[j] % 28 < 14:
@@ -1232,18 +1382,26 @@ class Window(QMainWindow):
                         brush2.setColor(color_set[color_sequence[j]])
                         brush2.setStyle(Qt.SolidPattern)
                         painter2.setBrush(brush2)
-                        painter2.drawRects(QtCore.QRect(int(round(70 + nested_length)), 
-                                                        75 + 20 * i, 
-                                                        int(round(self.part_lengths[j].item())), 
-                                                        16))
+                        painter2.drawRects(
+                            QtCore.QRect(
+                                int(round(70 + nested_length)),
+                                75 + (hight_bar + 4) * i,
+                                int(round(self.part_lengths[j].item())),
+                                hight_bar,
+                            )
+                        )
 
                         brush2.setColor(darker_color_set[color_sequence[j]])
                         brush2.setStyle(Qt.BDiagPattern)
                         painter2.setBrush(brush2)
-                        painter2.drawRects(QtCore.QRect(int(round(70 + nested_length)), 
-                                                        75 + 20 * i, 
-                                                        int(round(self.part_lengths[j].item())), 
-                                                        16))
+                        painter2.drawRects(
+                            QtCore.QRect(
+                                int(round(70 + nested_length)),
+                                75 + (hight_bar + 4) * i,
+                                int(round(self.part_lengths[j].item())),
+                                hight_bar,
+                            )
+                        )
 
                     # Border style
                     if 14 <= color_sequence[j] % 28 < 21:
@@ -1253,20 +1411,28 @@ class Window(QMainWindow):
                         brush2.setColor(color_set[color_sequence[j]])
                         brush2.setStyle(Qt.SolidPattern)
                         painter2.setBrush(brush2)
-                        painter2.drawRects(QtCore.QRect(int(round(70 + nested_length)), 
-                                                        75 + 20 * i, 
-                                                        int(round(self.part_lengths[j].item())), 
-                                                        16))
+                        painter2.drawRects(
+                            QtCore.QRect(
+                                int(round(70 + nested_length)),
+                                75 + (hight_bar + 4) * i,
+                                int(round(self.part_lengths[j].item())),
+                                hight_bar,
+                            )
+                        )
 
                         brush2.setStyle(Qt.NoBrush)
                         painter2.setBrush(brush2)
                         pen2.setWidth(3)
                         pen2.setColor(darker_color_set[color_sequence[j]])
                         painter2.setPen(pen2)
-                        painter2.drawRects(QtCore.QRect(int(round(70 + nested_length)) + 4, 
-                                                        79 + 20 * i, 
-                                                        int(round(self.part_lengths[j].item())) - 8, 
-                                                        8))
+                        painter2.drawRects(
+                            QtCore.QRect(
+                                int(round(70 + nested_length)) + 4,
+                                79 + (hight_bar + 4) * i,
+                                int(round(self.part_lengths[j].item())) - 8,
+                                8,
+                            )
+                        )
 
                     # Double diagonal style
                     if 21 <= color_sequence[j] % 28 < 28:
@@ -1276,18 +1442,26 @@ class Window(QMainWindow):
                         brush2.setColor(color_set[color_sequence[j]])
                         brush2.setStyle(Qt.SolidPattern)
                         painter2.setBrush(brush2)
-                        painter2.drawRects(QtCore.QRect(int(round(70 + nested_length)), 
-                                                        75 + 20 * i, 
-                                                        int(round(self.part_lengths[j].item())), 
-                                                        16))
+                        painter2.drawRects(
+                            QtCore.QRect(
+                                int(round(70 + nested_length)),
+                                75 + (hight_bar + 4) * i,
+                                int(round(self.part_lengths[j].item())),
+                                hight_bar,
+                            )
+                        )
 
                         brush2.setColor(darker_color_set[color_sequence[j]])
                         brush2.setStyle(Qt.DiagCrossPattern)
                         painter2.setBrush(brush2)
-                        painter2.drawRects(QtCore.QRect(int(round(70 + nested_length)), 
-                                                        75 + 20 * i, 
-                                                        int(round(self.part_lengths[j].item())), 
-                                                        16))
+                        painter2.drawRects(
+                            QtCore.QRect(
+                                int(round(70 + nested_length)),
+                                75 + (hight_bar + 4) * i,
+                                int(round(self.part_lengths[j].item())),
+                                hight_bar,
+                            )
+                        )
 
                     nested_length += self.part_lengths[j].item() + self.spacing
         painter2.end()
@@ -1300,12 +1474,12 @@ class Window(QMainWindow):
         painter3.setPen(pen3)
 
         font = QtGui.QFont()
-        font.setFamily('Times')
+        font.setFamily("Times")
         font.setBold(True)
         font.setUnderline(True)
         font.setPointSize(10)
         painter3.setFont(font)
-        painter3.drawText(70, 55, 1000, 16, Qt.AlignCenter, 'PATTERN')
+        painter3.drawText(70, 55, 1000, 16, Qt.AlignCenter, "PATTERN")
 
         font.setBold(False)
         font.setUnderline(False)
@@ -1320,7 +1494,10 @@ class Window(QMainWindow):
                     width = 13 * len(self.part_names[j])
                     height = 14
                     gradient_width = width + 50
-                    x_pos = int(round(70 + nested_length) + round((self.part_lengths[j].item() - gradient_width) / 2))
+                    x_pos = int(
+                        round(70 + nested_length)
+                        + round((self.part_lengths[j].item() - gradient_width) / 2)
+                    )
                     y_pos = 76 + 20 * i
 
                     linear_gradient = QLinearGradient(0, 0, gradient_width, 0)
@@ -1331,23 +1508,32 @@ class Window(QMainWindow):
                     painter3.setBrush(QBrush(linear_gradient))
                     painter3.setPen(Qt.NoPen)
                     painter3.setTransform(QtGui.QTransform().translate(x_pos, y_pos))
-                    painter3.drawRect(QtCore.QRect(max(0, round((gradient_width - self.part_lengths[j].item()) / 2)), 
-                                                   0, 
-                                                   min(round(self.part_lengths[j].item()), gradient_width), 
-                                                   height
-                                                   ))
+                    painter3.drawRect(
+                        QtCore.QRect(
+                            max(
+                                0,
+                                round(
+                                    (gradient_width - self.part_lengths[j].item()) / 2
+                                ),
+                            ),
+                            0,
+                            min(round(self.part_lengths[j].item()), gradient_width),
+                            height,
+                        )
+                    )
 
                     painter3.setBrush(Qt.NoBrush)
                     painter3.setPen(pen3)
                     painter3.setTransform(QtGui.QTransform().translate(0, 0))
                     painter3.setFont(font)
-                    painter3.drawText(int(round(70 + nested_length)), 
-                                      75 + 20 * i, 
-                                      int(round(self.part_lengths[j].item())), 
-                                      16, 
-                                      Qt.AlignCenter, 
-                                      self.part_names[j]
-                                      )
+                    painter3.drawText(
+                        int(round(70 + nested_length)),
+                        75 + (hight_bar + 4) * i,
+                        int(round(self.part_lengths[j].item())),
+                        16,
+                        Qt.AlignCenter,
+                        self.part_names[j],
+                    )
                     nested_length += self.part_lengths[j].item() + self.spacing
 
         # TODO add legend with part info?
@@ -1356,7 +1542,7 @@ class Window(QMainWindow):
         font.setUnderline(True)
         font.setPointSize(10)
         painter3.setFont(font)
-        painter3.drawText(0, 55, 65, 16, Qt.AlignRight, 'QTY')
+        painter3.drawText(0, 55, 65, 16, Qt.AlignRight, "QTY")
 
         font.setBold(False)
         font.setUnderline(False)
@@ -1364,7 +1550,14 @@ class Window(QMainWindow):
         qty = np.zeros((num_columns, 1))
         for i in range(num_columns):
             qty[i] = self.calculator.final_allocations[i]
-            painter3.drawText(0, 76 + 20 * i, 65, 16, Qt.AlignRight, str(int(qty[i].item())) + ' X')
+            painter3.drawText(
+                0,
+                76 + (hight_bar + 4) * i,
+                65,
+                16,
+                Qt.AlignRight,
+                str(int(qty[i].item())) + " X",
+            )
         painter3.end()
 
         painter4 = QtGui.QPainter(self.nest_image.pixmap())
@@ -1388,9 +1581,15 @@ class Window(QMainWindow):
         scrap = round(self.calculator.scrap_without_drop * 100, 1)
         containers = int(self.calculator.actual_max_containers)
 
-        painter4.drawText(250, 20, 600, 16, Qt.AlignCenter,
-                          f'- - - - - - - - {num_lengths_int} lengths ({num_lengths_2place}) '
-                          f'- - - - - {scrap}% scrap - - - - - {containers} containers - - - - - - - -')
+        painter4.drawText(
+            250,
+            20,
+            600,
+            16,
+            Qt.AlignCenter,
+            f"- - - - - - - - {num_lengths_int} lengths ({num_lengths_2place}) "
+            f"- - - - - {scrap}% scrap - - - - - {containers} containers - - - - - - - -",
+        )
         painter4.end()
 
         self.nest_image.update()
