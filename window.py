@@ -21,6 +21,7 @@ from xml.etree import ElementTree
 from nest_calculation import CalculateThread
 
 # from fractions import Fraction
+import ctypes
 
 
 # Create subclass of QMainWindow for the application window
@@ -56,10 +57,13 @@ class Window(QMainWindow):
         self.grid_layout.setVerticalSpacing(20)
 
         # Set properties of the window
-        self.setGeometry(
-            150, 35, 1000, 600
-        )  # TODO make window and contents adjustable to any size, allow zooming
+        # user32 = ctypes.windll.user32
+        # screenWidth = user32.GetSystemMetrics(0)
+        # screenHeight = user32.GetSystemMetrics(1)
 
+        self.setGeometry(150, 35, 1000, 600)
+        # TODO make window and contents adjustable to any size, allow zooming
+        self.setWindowState(Qt.WindowMaximized)
         self.setWindowTitle(f"LengthNestPro, The free 1D nesting optimizer")
         self.setWindowIcon(
             QtGui.QIcon("C:/Program Files (x86)/LengthNestPro v1.3/icon.ico")
@@ -106,6 +110,7 @@ class Window(QMainWindow):
 
         # Create blank canvas by placing a label object in the window and setting its properties
         self.nest_image = QtWidgets.QLabel()
+
         canvas = QtGui.QPixmap(1400, 422)
         canvas.fill(QColor(150, 150, 150))
         self.nest_image.setPixmap(canvas)
