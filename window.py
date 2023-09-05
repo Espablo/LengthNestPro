@@ -6,7 +6,7 @@ import math
 
 # import sys
 import os
-from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5 import QtWidgets, QtGui, QtCore, QtPrintSupport
 from PyQt5.QtWidgets import (
     QMainWindow,
     QTableWidget,
@@ -413,19 +413,19 @@ class Window(QMainWindow):
         self.grid_layout.setRowStretch(3, 1)
 
     def dragEnterEvent(self, event):
-        if event.mimeData().urls()[0].toLocalFile()[-8:] == ".LNP.xml":
+        if event.mimeData().urls()[0].toLocalFile()[-8:] == ".csv":
             event.accept()
         else:
             event.ignore()
 
     def dragMoveEvent(self, event):
-        if event.mimeData().urls()[0].toLocalFile()[-8:] == ".LNP.xml":
+        if event.mimeData().urls()[0].toLocalFile()[-8:] == ".csv":
             event.accept()
         else:
             event.ignore()
 
     def dropEvent(self, event):
-        if event.mimeData().urls()[0].toLocalFile()[-8:] == ".LNP.xml":
+        if event.mimeData().urls()[0].toLocalFile()[-8:] == ".csv":
             event.setDropAction(Qt.CopyAction)  # TODO ???
             self.file_path = event.mimeData().urls()[0].toLocalFile()
             self.open_call()
@@ -569,24 +569,20 @@ class Window(QMainWindow):
         self.t1.clearContents()
 
     def open_call(self):
-        # Allow user to select xml file to open, or use file path from drag and drop
+        # Allow user to select csv file to open, or use file path from drag and drop
         if self.file_path == 0:
             file_path = QFileDialog.getOpenFileName(
                 QFileDialog(),
                 "",
                 self.default_path_string,
-                "LengthNestPro xml (*.csv)",
+                "LengthNestPro csv (*.csv)",
             )[0]
         else:
             file_path = self.file_path
 
         if file_path:  # Make sure the user selected a file before trying to open one
-            # tree = ElementTree.parse(file_path)
-            # nesting_job = tree.getroot()
-
             # # Create blank list with length equal to the number of parts in the nesting job
             blank_list = []
-            # required_parts = nesting_job.find("requiredParts")
             for i in range(20):
                 blank_list.append(QTableWidgetItem(""))
 
@@ -766,6 +762,32 @@ class Window(QMainWindow):
                     f"LengthNestPro, The free 1D nesting optimizer - {self.name_of_open_file}"
                 )
                 self.statusBar().showMessage("Ready")
+
+    def print_widget(self, widget, filename):
+        printer = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.HighResolution)
+        printer.setOutputFormat(QtPrintSupport.QPrinter.PdfFormat)
+        printer.setOrientation(QtPrintSupport.QPrinter.Landscape)
+        printer.setOutputFileName(filename)
+        painter = QtGui.QPainter(printer)
+
+        # start scale
+        xscale = printer.pageRect().width() * 1.0 / widget.width()
+        yscale = printer.pageRect().height() * 1.0 / widget.height()
+        scale = min(xscale, yscale)
+        painter.translate(printer.paperRect().center())
+        painter.scale(scale, scale)
+        painter.translate(-widget.width() / 2, -widget.height() / 2)
+        # end scale
+
+        widget.render(painter)
+        painter.end()
+
+    def SavetoPDF(self):
+        fn = self.name_of_open_file[:-4]
+        if fn:
+            if QtCore.QFileInfo(fn).suffix() == "":
+                fn += ".pdf"
+            self.print_widget(self.nest_image, fn)
 
     def save_results_call(self):
         # Make sure a file is open, and exit function if it is not
@@ -1609,3 +1631,4 @@ class Window(QMainWindow):
         self.nest_image.update()
 
         self.save_results_call()
+        self.SavetoPDF()
