@@ -23,6 +23,9 @@ from nest_calculation import CalculateThread
 # from fractions import Fraction
 import ctypes
 
+canvasHeight = 422
+canvasWidth = 1700
+
 
 # Create subclass of QMainWindow for the application window
 class Window(QMainWindow):
@@ -61,7 +64,7 @@ class Window(QMainWindow):
         # screenWidth = user32.GetSystemMetrics(0)
         # screenHeight = user32.GetSystemMetrics(1)
 
-        self.setGeometry(150, 35, 1000, 600)
+        self.setGeometry(150, 35, 1200, 600)
         # TODO make window and contents adjustable to any size, allow zooming
         self.setWindowState(Qt.WindowMaximized)
         self.setWindowTitle(f"LengthNestPro, The free 1D nesting optimizer")
@@ -111,13 +114,13 @@ class Window(QMainWindow):
         # Create blank canvas by placing a label object in the window and setting its properties
         self.nest_image = QtWidgets.QLabel()
 
-        canvas = QtGui.QPixmap(1400, 422)
+        canvas = QtGui.QPixmap(canvasWidth, canvasHeight)
         canvas.fill(QColor(150, 150, 150))
         self.nest_image.setPixmap(canvas)
 
         # Place nest_image inside of a scroll area
         self.scroll_area = QtWidgets.QScrollArea()
-        self.scroll_area.setFixedWidth(1440)
+        self.scroll_area.setFixedWidth(1740)
         self.scroll_area.setFixedHeight(540)
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setWidget(self.nest_image)
@@ -1054,7 +1057,7 @@ class Window(QMainWindow):
         # Delete and recreate blank canvas
         self.nest_image.clear()
         self.nest_image = QtWidgets.QLabel()
-        canvas = QtGui.QPixmap(1400, 422)
+        canvas = QtGui.QPixmap(canvasWidth, canvasHeight)
         canvas.fill(QColor(150, 150, 150))
         self.nest_image.setPixmap(canvas)
         self.scroll_area.setWidget(self.nest_image)
@@ -1210,11 +1213,11 @@ class Window(QMainWindow):
         (num_rows, num_columns) = np.shape(self.calculator.final_patterns)
 
         if num_columns > 15:
-            canvas = QtGui.QPixmap(1400, 422 + (num_columns - 15) * 20)
+            canvas = QtGui.QPixmap(canvasWidth, canvasHeight + (num_columns - 15) * 20)
             canvas.fill(QColor(150, 150, 150))
             self.nest_image.setPixmap(canvas)
             self.nest_image.setAlignment(Qt.AlignCenter)
-        scale = 1300
+        scale = canvasWidth - 100
         pixel_scale_factor = scale / self.stock_length
         self.part_lengths = self.part_lengths * pixel_scale_factor
         self.spacing = self.spacing * pixel_scale_factor
