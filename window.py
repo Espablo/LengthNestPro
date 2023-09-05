@@ -21,7 +21,8 @@ from xml.etree import ElementTree
 from nest_calculation import CalculateThread
 
 # from fractions import Fraction
-import ctypes
+# import ctypes
+import csv
 
 canvasHeight = 422
 canvasWidth = 1700
@@ -263,10 +264,10 @@ class Window(QMainWindow):
             ]
         )
 
-        self.stock_length = QTableWidgetItem("240")
-        self.left_waste = QTableWidgetItem("4.72")
-        self.right_waste = QTableWidgetItem("0.5")
-        self.spacing = QTableWidgetItem("0.29")
+        self.stock_length = QTableWidgetItem("6000")
+        self.left_waste = QTableWidgetItem("5")
+        self.right_waste = QTableWidgetItem("500")
+        self.spacing = QTableWidgetItem("10")
         self.max_parts_per_nest = QTableWidgetItem("4")
         self.max_containers = QTableWidgetItem("4")
 
@@ -574,79 +575,84 @@ class Window(QMainWindow):
                 QFileDialog(),
                 "",
                 self.default_path_string,
-                "LengthNestPro xml (*.LNP.xml)",
+                "LengthNestPro xml (*.csv)",
             )[0]
         else:
             file_path = self.file_path
 
         if file_path:  # Make sure the user selected a file before trying to open one
-            tree = ElementTree.parse(file_path)
-            nesting_job = tree.getroot()
+            # tree = ElementTree.parse(file_path)
+            # nesting_job = tree.getroot()
 
-            # Create blank list with length equal to the number of parts in the nesting job
+            # # Create blank list with length equal to the number of parts in the nesting job
             blank_list = []
-            required_parts = nesting_job.find("requiredParts")
-            for i in range(len(required_parts)):
+            # required_parts = nesting_job.find("requiredParts")
+            for i in range(20):
                 blank_list.append(QTableWidgetItem(""))
 
-            # Copy blank list to initialize each attribute
+            # # Copy blank list to initialize each attribute
             name = blank_list.copy()
             qty = blank_list.copy()
             length = blank_list.copy()
 
-            # Clear contents from table
+            # # Clear contents from table
             self.t1.clearContents()
+            with open(file_path, "r") as file:
+                csvreader = csv.reader(file)
+                # Set a line count so we know which line has the headings
+                line_count = 0
+                for row in csvreader:
+                    # Print out the headings from the first line of the file
+                    if line_count != 0:
+                        name[line_count - 1] = QTableWidgetItem(row[0])
+                        qty[line_count - 1] = QTableWidgetItem(row[1])
+                        length[line_count - 1] = QTableWidgetItem(row[2])
+                        name[line_count - 1].setTextAlignment(Qt.AlignCenter)
+                        qty[line_count - 1].setTextAlignment(Qt.AlignCenter)
+                        length[line_count - 1].setTextAlignment(Qt.AlignCenter)
+                        self.t1.setItem(line_count - 1, 0, qty[line_count - 1])
+                        self.t1.setItem(line_count - 1, 1, length[line_count - 1])
+                        self.t1.setItem(line_count - 1, 2, name[line_count - 1])
+                    line_count += 1
 
-            # Extract info for each part and add it to "required parts" table
-            for i, part in enumerate(required_parts):
-                name[i] = QTableWidgetItem(part.find("name").text)
-                qty[i] = QTableWidgetItem(part.find("qty").text)
-                length[i] = QTableWidgetItem(part.find("length").text)
-                name[i].setTextAlignment(Qt.AlignCenter)
-                qty[i].setTextAlignment(Qt.AlignCenter)
-                length[i].setTextAlignment(Qt.AlignCenter)
-                self.t1.setItem(i, 0, qty[i])
-                self.t1.setItem(i, 1, length[i])
-                self.t1.setItem(i, 2, name[i])
+            # # Extract nesting settings and add them to "nesting settings" table
+            # nesting_settings = nesting_job.find("nestingSettings")
 
-            # Extract nesting settings and add them to "nesting settings" table
-            nesting_settings = nesting_job.find("nestingSettings")
+            # if hasattr(nesting_settings.find("stockLength"), "text"):
+            #     stock_length = QTableWidgetItem(
+            #         nesting_settings.find("stockLength").text
+            #     )
+            #     stock_length.setTextAlignment(Qt.AlignCenter)
+            #     self.t2.setItem(0, 0, stock_length)
 
-            if hasattr(nesting_settings.find("stockLength"), "text"):
-                stock_length = QTableWidgetItem(
-                    nesting_settings.find("stockLength").text
-                )
-                stock_length.setTextAlignment(Qt.AlignCenter)
-                self.t2.setItem(0, 0, stock_length)
+            # if hasattr(nesting_settings.find("leftWaste"), "text"):
+            #     left_waste = QTableWidgetItem(nesting_settings.find("leftWaste").text)
+            #     left_waste.setTextAlignment(Qt.AlignCenter)
+            #     self.t2.setItem(1, 0, left_waste)
 
-            if hasattr(nesting_settings.find("leftWaste"), "text"):
-                left_waste = QTableWidgetItem(nesting_settings.find("leftWaste").text)
-                left_waste.setTextAlignment(Qt.AlignCenter)
-                self.t2.setItem(1, 0, left_waste)
+            # if hasattr(nesting_settings.find("rightWaste"), "text"):
+            #     right_waste = QTableWidgetItem(nesting_settings.find("rightWaste").text)
+            #     right_waste.setTextAlignment(Qt.AlignCenter)
+            #     self.t2.setItem(2, 0, right_waste)
 
-            if hasattr(nesting_settings.find("rightWaste"), "text"):
-                right_waste = QTableWidgetItem(nesting_settings.find("rightWaste").text)
-                right_waste.setTextAlignment(Qt.AlignCenter)
-                self.t2.setItem(2, 0, right_waste)
+            # if hasattr(nesting_settings.find("spacing"), "text"):
+            #     spacing = QTableWidgetItem(nesting_settings.find("spacing").text)
+            #     spacing.setTextAlignment(Qt.AlignCenter)
+            #     self.t2.setItem(3, 0, spacing)
 
-            if hasattr(nesting_settings.find("spacing"), "text"):
-                spacing = QTableWidgetItem(nesting_settings.find("spacing").text)
-                spacing.setTextAlignment(Qt.AlignCenter)
-                self.t2.setItem(3, 0, spacing)
+            # if hasattr(nesting_settings.find("maxPartsPerNest"), "text"):
+            #     max_parts_per_nest = QTableWidgetItem(
+            #         nesting_settings.find("maxPartsPerNest").text
+            #     )
+            #     max_parts_per_nest.setTextAlignment(Qt.AlignCenter)
+            #     self.t2.setItem(4, 0, max_parts_per_nest)
 
-            if hasattr(nesting_settings.find("maxPartsPerNest"), "text"):
-                max_parts_per_nest = QTableWidgetItem(
-                    nesting_settings.find("maxPartsPerNest").text
-                )
-                max_parts_per_nest.setTextAlignment(Qt.AlignCenter)
-                self.t2.setItem(4, 0, max_parts_per_nest)
-
-            if hasattr(nesting_settings.find("maxContainers"), "text"):
-                max_containers = QTableWidgetItem(
-                    nesting_settings.find("maxContainers").text
-                )
-                max_containers.setTextAlignment(Qt.AlignCenter)
-                self.t2.setItem(5, 0, max_containers)
+            # if hasattr(nesting_settings.find("maxContainers"), "text"):
+            #     max_containers = QTableWidgetItem(
+            #         nesting_settings.find("maxContainers").text
+            #     )
+            #     max_containers.setTextAlignment(Qt.AlignCenter)
+            #     self.t2.setItem(5, 0, max_containers)
 
             self.name_of_open_file = file_path
             self.setWindowTitle(
