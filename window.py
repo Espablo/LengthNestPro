@@ -597,18 +597,34 @@ class Window(QMainWindow):
                 csvreader = csv.reader(file)
                 # Set a line count so we know which line has the headings
                 line_count = 0
+                spacing = 1
                 for row in csvreader:
                     # Print out the headings from the first line of the file
                     if line_count != 0:
-                        name[line_count - 1] = QTableWidgetItem(row[0])
-                        qty[line_count - 1] = QTableWidgetItem(row[1])
-                        length[line_count - 1] = QTableWidgetItem(row[2])
-                        name[line_count - 1].setTextAlignment(Qt.AlignCenter)
-                        qty[line_count - 1].setTextAlignment(Qt.AlignCenter)
-                        length[line_count - 1].setTextAlignment(Qt.AlignCenter)
-                        self.t1.setItem(line_count - 1, 0, qty[line_count - 1])
-                        self.t1.setItem(line_count - 1, 1, length[line_count - 1])
-                        self.t1.setItem(line_count - 1, 2, name[line_count - 1])
+                        word = row[0]
+
+                        if word.find("Profil") != -1:
+                            name[line_count - spacing] = QTableWidgetItem(
+                                word[13 : len(word)]
+                            )
+                            qty[line_count - spacing] = QTableWidgetItem(row[1])
+                            length[line_count - spacing] = QTableWidgetItem(row[4])
+                            name[line_count - spacing].setTextAlignment(Qt.AlignCenter)
+                            qty[line_count - spacing].setTextAlignment(Qt.AlignCenter)
+                            length[line_count - spacing].setTextAlignment(
+                                Qt.AlignCenter
+                            )
+                            self.t1.setItem(
+                                line_count - spacing, 0, qty[line_count - spacing]
+                            )
+                            self.t1.setItem(
+                                line_count - spacing, 1, length[line_count - spacing]
+                            )
+                            self.t1.setItem(
+                                line_count - spacing, 2, name[line_count - spacing]
+                            )
+                        else:
+                            spacing += 1
                     line_count += 1
 
             # # Extract nesting settings and add them to "nesting settings" table
